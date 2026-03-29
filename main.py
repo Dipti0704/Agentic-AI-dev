@@ -1,4 +1,6 @@
 from agents.planner import planner_agent
+from agents.architect import architect_agent
+
 
 def run():
     print("🤖 AI Developer System Started")
@@ -19,6 +21,17 @@ def run():
 
     print("✅ Tasks:\n")
     print(tasks)
+
+ # Step 2: Architecture
+    print("\n🏗️ Designing...\n")
+    architecture = architect_agent(tasks)
+
+    if not architecture:
+        print("❌ Architect failed")
+        return
+
+    print("✅ Architecture:\n")
+    print(architecture)
 
 if __name__ == "__main__":
     run()
