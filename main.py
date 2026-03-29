@@ -1,6 +1,8 @@
 from agents.planner import planner_agent
 from agents.architect import architect_agent
 from agents.coder import coder_agent
+from tools.executor import run_code
+from config import MAIN_FILE
 import json
 
 
@@ -38,15 +40,29 @@ def run():
 
     # Step 3: Code generation
     print("\n💻 Coding...\n")
+    all_code ={}
 
     for file in files:
         path = file["path"]
         desc = file["description"]
 
         print(f"Generating {path}...")
-        coder_agent(architecture_raw, path, desc)
+        code = coder_agent(architecture_raw, path, desc)
+        all_code[path] = code
 
-    print("\n✅ Project Generated Successfully!")
+    # Step 4: Execution
+    print("\n▶️ Running generated code...\n")
+
+    if MAIN_FILE not in all_code:
+        print(f"❌ {MAIN_FILE} not found")
+        return
+
+    output, error = run_code(all_code[MAIN_FILE])
+
+    if error:
+        print("❌ Error:\n", error)
+    else:
+        print("✅ Success:\n", output)
 
 if __name__ == "__main__":
     run()

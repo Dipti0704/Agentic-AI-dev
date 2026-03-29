@@ -4,8 +4,35 @@ import os
 
 def clean_code(raw: str) -> str:
     lines = raw.strip().splitlines()
-    cleaned = [l for l in lines if not l.strip().startswith("```")]
+
+    cleaned = []
+    started = False
+
+    for line in lines:
+        line_strip = line.strip()
+
+        # skip markdown
+        if line_strip.startswith("```"):
+            continue
+
+        # skip file labels like "app.py:"
+        if line_strip.endswith(".py:") or line_strip.endswith(".js:"):
+            continue
+
+        # detect start of real code
+        if not started:
+            if line_strip.startswith((
+                "import", "from", "#!", "#",
+                "class", "def", "@",
+                "<!DOCTYPE", "<html"
+            )):
+                started = True
+
+        if started:
+            cleaned.append(line)
+
     return "\n".join(cleaned)
+
 
 def coder_agent(architecture: str, file_path: str, file_desc: str) -> str:
     prompt = f"""You are an expert developer.
