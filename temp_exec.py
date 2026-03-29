@@ -11,13 +11,14 @@ def get_all_todos():
     ]
     return jsonify({'todos': todos})
 
-# API route to add a new todo
+# API route to create a new todo
 @app.route('/todos', methods=['POST'])
-def add_todo():
+def create_todo():
     data = request.get_json()
-    todo = {'id': len(todos) + 1, 'title': data['title'], 'done': False}
-    todos.append(todo)
-    return jsonify({'todo': todo})
+    todo = {'id': len(open('todo.txt').readlines()) + 1, 'title': data['title'], 'done': False}
+    with open('todo.txt', 'a') as f:
+        f.write(f"{todo['id']}: {todo['title']} - {str(todo['done'])}\n")
+    return jsonify({'message': 'Todo created successfully'})
 
 if __name__ == '__main__':
     app.run(debug=True)
