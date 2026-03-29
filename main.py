@@ -1,5 +1,4 @@
-from llm import call_ollama
-from config import MODEL_PLANNER
+from agents.planner import planner_agent
 
 def run():
     print("🤖 AI Developer System Started")
@@ -10,19 +9,16 @@ def run():
         print("❌ Empty input")
         return
 
-    print("\n🧠 Sending idea to LLM...\n")
+    print("\n🧠 Planning...\n")
 
-    response = call_ollama(
-        prompt=f"Break this idea into steps:\n{idea}",
-        model=MODEL_PLANNER
-    )
+    tasks = planner_agent(idea)
 
-    if not response:
-        print("❌ No response from LLM")
+    if not tasks:
+        print("❌ Planner failed")
         return
 
-    print("✅ LLM Response:\n")
-    print(response)
+    print("✅ Tasks:\n")
+    print(tasks)
 
 if __name__ == "__main__":
     run()
