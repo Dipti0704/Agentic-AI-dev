@@ -8,6 +8,8 @@ Given the tasks below, output ONLY a valid JSON describing the project structure
 
 Rules:
 - Output ONLY JSON (no explanation, no markdown)
+- Output MUST be valid JSON only
+- Do NOT wrap in ```json
 - Each file must have "path" and "description"
 - Keep it simple (3-5 files)
 - Use Flask for backend

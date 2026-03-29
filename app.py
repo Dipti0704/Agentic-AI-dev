@@ -2,23 +2,22 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# API route to get all todos
-@app.route('/todos', methods=['GET'])
-def get_all_todos():
-    todos = [
-        {'id': 1, 'title': 'Buy milk', 'done': False},
-        {'id': 2, 'title': 'Walk the dog', 'done': True}
+# API route to get all tasks
+@app.route('/tasks', methods=['GET'])
+def get_tasks():
+    tasks = [
+        {'id': 1, 'title': 'Task 1', 'description': 'This is task 1'},
+        {'id': 2, 'title': 'Task 2', 'description': 'This is task 2'}
     ]
-    return jsonify({'todos': todos})
+    return jsonify({'tasks': tasks})
 
-# API route to create a new todo
-@app.route('/todos', methods=['POST'])
-def create_todo():
+# API route to create a new task
+@app.route('/tasks', methods=['POST'])
+def create_task():
     data = request.get_json()
-    todo = {'id': len(open('todo.txt').readlines()) + 1, 'title': data['title'], 'done': False}
-    with open('todo.txt', 'a') as f:
-        f.write(f"{todo['id']}: {todo['title']} - {str(todo['done'])}\n")
-    return jsonify({'message': 'Todo created successfully'})
+    task = {'id': len(tasks) + 1, 'title': data['title'], 'description': data['description']}
+    tasks.append(task)
+    return jsonify({'task': task})
 
 if __name__ == '__main__':
     app.run(debug=True)

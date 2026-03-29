@@ -8,6 +8,18 @@ from config import MAX_DEBUG_TRIES
 import json
 
 
+def clean_json(raw: str) -> str:
+    lines = raw.strip().splitlines()
+
+    cleaned = []
+    for line in lines:
+        if line.strip().startswith("```"):
+            continue
+        cleaned.append(line)
+
+    return "\n".join(cleaned)
+
+
 def run():
     print("🤖 AI Developer System Started")
 
@@ -33,11 +45,14 @@ def run():
     architecture_raw = architect_agent(tasks)
     print(architecture_raw)
 
+    cleaned_json = clean_json(architecture_raw)
+
     try:
-        architecture = json.loads(architecture_raw)
+        architecture = json.loads(cleaned_json)
         files = architecture["files"]
-    except:
-        print("❌ Invalid JSON from architect")
+    except Exception as e:
+        print("❌ JSON Parse Failed:", e)
+        print("RAW OUTPUT:\n", architecture_raw)
         return
 
     # Step 3: Code generation
