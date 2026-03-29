@@ -6,6 +6,7 @@ from config import MAIN_FILE
 from agents.debugger import debug_agent
 from config import MAX_DEBUG_TRIES
 import json
+from memory.vector_store import store_memory, search_memory
 
 
 def clean_json(raw: str) -> str:
@@ -28,6 +29,14 @@ def run():
     if not idea.strip():
         print("❌ Empty input")
         return
+    
+    print("\n🧠 Retrieving memory...\n")
+    past_context = search_memory(idea)
+
+    if past_context:
+        print("📚 Found related memory:")
+        for mem in past_context:
+            print("-", mem)
 
     print("\n🧠 Planning...\n")
 
@@ -104,6 +113,8 @@ def run():
 
         with open(MAIN_FILE, "w") as f:
             f.write(current_code)
+            
+    store_memory(f"Idea: {idea}\nTasks: {tasks}")
             
 if __name__ == "__main__":
     run()
