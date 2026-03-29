@@ -1,5 +1,7 @@
 from agents.planner import planner_agent
 from agents.architect import architect_agent
+from agents.coder import coder_agent
+import json
 
 
 def run():
@@ -22,16 +24,29 @@ def run():
     print("✅ Tasks:\n")
     print(tasks)
 
- # Step 2: Architecture
+# Step 2: Architecture
     print("\n🏗️ Designing...\n")
-    architecture = architect_agent(tasks)
+    architecture_raw = architect_agent(tasks)
+    print(architecture_raw)
 
-    if not architecture:
-        print("❌ Architect failed")
+    try:
+        architecture = json.loads(architecture_raw)
+        files = architecture["files"]
+    except:
+        print("❌ Invalid JSON from architect")
         return
 
-    print("✅ Architecture:\n")
-    print(architecture)
+    # Step 3: Code generation
+    print("\n💻 Coding...\n")
+
+    for file in files:
+        path = file["path"]
+        desc = file["description"]
+
+        print(f"Generating {path}...")
+        coder_agent(architecture_raw, path, desc)
+
+    print("\n✅ Project Generated Successfully!")
 
 if __name__ == "__main__":
     run()
