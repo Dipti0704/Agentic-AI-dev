@@ -21,3 +21,8 @@ MAX_DEBUG_TRIES = 3
 # ── Project Settings ───────────────────────────────────────────────
 OUTPUT_DIR      = "."
 MAIN_FILE       = "app.py"
+
+
+# ── Output settings ───────────────────────────────────────────────
+OUTPUT_DIR = "output"
+MAIN_FILE = "output/app.py"

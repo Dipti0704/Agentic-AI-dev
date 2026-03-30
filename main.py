@@ -7,6 +7,8 @@ from agents.debugger import debug_agent
 from config import MAX_DEBUG_TRIES
 import json
 from memory.vector_store import store_memory, search_memory
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 
 def clean_json(raw: str) -> str:

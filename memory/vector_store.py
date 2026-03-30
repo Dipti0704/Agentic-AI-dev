@@ -1,8 +1,9 @@
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
-# Initialize embedding model
-embedding = HuggingFaceEmbeddings()
+embedding = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
 # Create vector DB
 db = FAISS.from_texts(["init"], embedding)

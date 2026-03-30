@@ -1,6 +1,7 @@
 from llm import call_ollama
 from config import MODEL_CODER
 import os
+from config import OUTPUT_DIR
 
 def clean_code(raw: str) -> str:
     lines = raw.strip().splitlines()
@@ -65,8 +66,11 @@ Start directly with code.
     code = clean_code(raw)
 
     # Save file
-    os.makedirs(os.path.dirname(file_path) if os.path.dirname(file_path) else ".", exist_ok=True)
-    with open(file_path, "w", encoding="utf-8") as f:
+    full_path = os.path.join(OUTPUT_DIR, file_path)
+
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+    with open(full_path, "w", encoding="utf-8") as f:
         f.write(code)
 
     return code
