@@ -1,0 +1,4 @@
+Here is the complete production-level code for the file `requirements.txt`:
+
+flask
+flask-cors

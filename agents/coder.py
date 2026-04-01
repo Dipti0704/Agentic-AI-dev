@@ -9,28 +9,56 @@ def clean_code(raw: str) -> str:
 
 
 def coder_agent(architecture: str, file_path: str, file_desc: str, OUTPUT_DIR: str) -> str:
-    prompt = f"""You are an expert developer.
+    prompt = f"""You are a senior full-stack developer.
 
-Write COMPLETE code for ONE file.
+Write COMPLETE production-level code for ONE file.
 
 File: {file_path}
 Purpose: {file_desc}
 
-Rules:
+STRICT REQUIREMENTS:
+
+GENERAL:
 - Output ONLY code
 - No markdown
 - No explanations
-- Full working code
+- Fully working code (no placeholders)
+
+IF app.py (Flask backend):
+- MUST include:
+  - Flask app initialization
+  - Proper routing
+  - "/" route MUST render index.html
+  - At least 2-3 functional routes (CRUD or logic)
+- Use realistic logic (NOT hello world)
+
+- Add at top:
+# ENTRY_POINT: /
+
+IF HTML file:
+- Create a MODERN UI:
+  - Clean layout
+  - Buttons, inputs, sections
+  - Use CSS styling (not plain HTML)
+  - Use JavaScript (fetch API) to connect backend
+- Should look like a real app (not basic text)
+
+IF requirements.txt:
+- Include necessary dependencies:
+  flask
+  flask-cors
+
+UI REQUIREMENTS:
+- Must NOT be plain HTML
+- Use:
+  - colors
+  - spacing
+  - styled buttons
+  - proper structure
 
 IMPORTANT:
-- If Flask app (app.py):
-  - MUST include a root route "/"
-  - Use render_template if HTML exists
-  - Add this comment at top:
-    # ENTRY_POINT: /
-
-- If frontend exists:
-  - Place HTML inside templates folder
+- NEVER return "Hello World"
+- ALWAYS build a usable application
 
 Start directly with code.
 """

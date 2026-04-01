@@ -11,6 +11,8 @@ Rules:
 - Do NOT give explanations
 - Do NOT use bullet points
 - Output ONLY numbered list
+- Include frontend, backend, and UI tasks
+- Ensure app is fully usable
 
 Project Idea: {user_input}
 
@@ -19,6 +21,7 @@ Example:
 2. Add SQLite database connection
 3. Implement GET /todos route
 4. Implement POST /todos route
+
 """
 
     return call_ollama(prompt, MODEL_PLANNER)
