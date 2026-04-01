@@ -8,7 +8,6 @@ import json
 import os
 
 
-# ✅ create unique output folder
 def create_output_folder():
     base = "output"
     if not os.path.exists(base):
@@ -29,19 +28,25 @@ def clean_json(raw: str) -> str:
     return "\n".join([l for l in lines if not l.strip().startswith("```")])
 
 
+# 🔥 NEW: extract entry route
+def extract_entry_point(code):
+    for line in code.splitlines():
+        if "ENTRY_POINT:" in line:
+            return line.split("ENTRY_POINT:")[1].strip()
+    return "/"
+
+
 def run_pipeline(idea):
-    # ✅ always create new folder
     OUTPUT_DIR = create_output_folder()
 
     yield f"📁 Output folder created: {OUTPUT_DIR}"
-
     yield "🤖 AI Developer Started..."
 
     if not idea.strip():
         yield "❌ Empty input"
         return
 
-    # ── Planning ─────────────────────
+    # 🧠 Planning
     yield "🧠 Planning..."
     tasks = planner_agent(idea)
 
@@ -51,7 +56,7 @@ def run_pipeline(idea):
 
     yield f"📋 Tasks:\n{tasks}"
 
-    # ── Architecture ────────────────
+    # 🏗️ Architecture
     yield "🏗️ Designing architecture..."
     architecture_raw = architect_agent(tasks)
 
@@ -64,20 +69,16 @@ def run_pipeline(idea):
         yield f"❌ JSON Parse Failed: {e}"
         return
 
-    # ── Code Generation ─────────────
+    # 💻 Code generation
     yield "💻 Generating code..."
-    generated_files = []
-
     for file in files:
         path = file["path"]
         desc = file["description"]
 
         yield f"🔨 Generating {path}..."
+        coder_agent(architecture_raw, path, desc, OUTPUT_DIR)
 
-        code = coder_agent(architecture_raw, path, desc, OUTPUT_DIR)
-        generated_files.append(os.path.join(OUTPUT_DIR, path))
-
-    # ── Find main app ───────────────
+    # 🔍 find main file
     main_file_path = os.path.join(OUTPUT_DIR, "app.py")
 
     if not os.path.exists(main_file_path):
@@ -86,7 +87,7 @@ def run_pipeline(idea):
 
     yield f"✅ Main file found: {main_file_path}"
 
-    # ── Execution + Debug ───────────
+    # ▶️ Run + Debug
     yield "▶️ Running generated app..."
 
     with open(main_file_path, "r") as f:
@@ -98,11 +99,16 @@ def run_pipeline(idea):
         output, error = run_code(current_code)
 
         if not error:
+            entry = extract_entry_point(current_code)
+
             yield f"✅ Success:\n{output}"
             yield "🎉 Project Generated Successfully!"
 
-            # return folder path also
-            yield {"run_app": main_file_path}
+            # 🔥 send both app path + entry route
+            yield {
+                "run_app": main_file_path,
+                "entry": entry
+            }
             return
 
         yield f"❌ Error:\n{error}"

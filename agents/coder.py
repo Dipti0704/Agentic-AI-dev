@@ -21,6 +21,18 @@ Rules:
 - No markdown
 - No explanations
 - Full working code
+
+IMPORTANT:
+- If Flask app (app.py):
+  - MUST include a root route "/"
+  - Use render_template if HTML exists
+  - Add this comment at top:
+    # ENTRY_POINT: /
+
+- If frontend exists:
+  - Place HTML inside templates folder
+
+Start directly with code.
 """
 
     raw = call_ollama(prompt, MODEL_CODER)
