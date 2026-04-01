@@ -1,36 +1,27 @@
 import streamlit as st
 import subprocess
-import os
 import webbrowser
+from main import run_pipeline
 
-st.set_page_config(page_title="AI Developer", layout="wide")
+st.title("🤖 AI Developer")
 
-st.title("🤖 Autonomous AI Developer")
+idea = st.text_input("Enter your idea:")
 
-idea = st.text_input("Enter your project idea:")
+if st.button("Generate"):
+    logs_box = st.empty()
+    logs = ""
 
-if st.button("Generate Project"):
-    if not idea:
-        st.error("Please enter an idea")
-    else:
-        st.info("Running AI pipeline...")
+    app_path = None
 
-        # run main.py with input
-        process = subprocess.Popen(
-            ["python", "main.py"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+    for step in run_pipeline(idea):
+        if isinstance(step, dict) and "run_app" in step:
+            app_path = step["run_app"]
+        else:
+            logs += str(step) + "\n\n"
+            logs_box.code(logs)
 
-        stdout, stderr = process.communicate(input=idea)
+    st.success("✅ Done!")
 
-        st.subheader("📄 Output Logs")
-        st.code(stdout if stdout else stderr)
-
-        st.success("Project Generated!")
-
-        if os.path.exists("output/app.py"):
-            subprocess.Popen(["python", "output/app.py"])
-            webbrowser.open("http://127.0.0.1:5000")
+    if app_path:
+        subprocess.Popen(["python", app_path])
+        webbrowser.open("http://127.0.0.1:5000")

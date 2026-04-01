@@ -2,121 +2,124 @@ from agents.planner import planner_agent
 from agents.architect import architect_agent
 from agents.coder import coder_agent
 from tools.executor import run_code
-from config import MAIN_FILE
 from agents.debugger import debug_agent
 from config import MAX_DEBUG_TRIES
 import json
-from memory.vector_store import store_memory, search_memory
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
+import os
+
+
+# ✅ create unique output folder
+def create_output_folder():
+    base = "output"
+    if not os.path.exists(base):
+        os.makedirs(base)
+        return base
+
+    i = 1
+    while True:
+        new_path = f"{base}_{i}"
+        if not os.path.exists(new_path):
+            os.makedirs(new_path)
+            return new_path
+        i += 1
 
 
 def clean_json(raw: str) -> str:
     lines = raw.strip().splitlines()
-
-    cleaned = []
-    for line in lines:
-        if line.strip().startswith("```"):
-            continue
-        cleaned.append(line)
-
-    return "\n".join(cleaned)
+    return "\n".join([l for l in lines if not l.strip().startswith("```")])
 
 
-def run():
-    print("🤖 AI Developer System Started")
+def run_pipeline(idea):
+    # ✅ always create new folder
+    OUTPUT_DIR = create_output_folder()
 
-    idea = input("Enter your project idea: ")
+    yield f"📁 Output folder created: {OUTPUT_DIR}"
+
+    yield "🤖 AI Developer Started..."
 
     if not idea.strip():
-        print("❌ Empty input")
+        yield "❌ Empty input"
         return
-    
-    print("\n🧠 Retrieving memory...\n")
-    past_context = search_memory(idea)
 
-    if past_context:
-        print("📚 Found related memory:")
-        for mem in past_context:
-            print("-", mem)
-
-    print("\n🧠 Planning...\n")
-
+    # ── Planning ─────────────────────
+    yield "🧠 Planning..."
     tasks = planner_agent(idea)
 
     if not tasks:
-        print("❌ Planner failed")
+        yield "❌ Planner failed"
         return
 
-    print("✅ Tasks:\n")
-    print(tasks)
+    yield f"📋 Tasks:\n{tasks}"
 
-# Step 2: Architecture
-    print("\n🏗️ Designing...\n")
+    # ── Architecture ────────────────
+    yield "🏗️ Designing architecture..."
     architecture_raw = architect_agent(tasks)
-    print(architecture_raw)
 
-    cleaned_json = clean_json(architecture_raw)
+    yield f"📐 Architecture:\n{architecture_raw}"
 
     try:
-        architecture = json.loads(cleaned_json)
+        architecture = json.loads(clean_json(architecture_raw))
         files = architecture["files"]
     except Exception as e:
-        print("❌ JSON Parse Failed:", e)
-        print("RAW OUTPUT:\n", architecture_raw)
+        yield f"❌ JSON Parse Failed: {e}"
         return
 
-    # Step 3: Code generation
-    print("\n💻 Coding...\n")
-    all_code ={}
+    # ── Code Generation ─────────────
+    yield "💻 Generating code..."
+    generated_files = []
 
     for file in files:
         path = file["path"]
         desc = file["description"]
 
-        print(f"Generating {path}...")
-        code = coder_agent(architecture_raw, path, desc)
-        all_code[path] = code
+        yield f"🔨 Generating {path}..."
 
-    
-    # Step 4: Execution + Debug loop
-    print("\n▶️ Running generated code...\n")
+        code = coder_agent(architecture_raw, path, desc, OUTPUT_DIR)
+        generated_files.append(os.path.join(OUTPUT_DIR, path))
 
-    if MAIN_FILE not in all_code:
-        print(f"❌ {MAIN_FILE} not found")
+    # ── Find main app ───────────────
+    main_file_path = os.path.join(OUTPUT_DIR, "app.py")
+
+    if not os.path.exists(main_file_path):
+        yield "❌ app.py not found in output folder"
         return
 
-    current_code = all_code[MAIN_FILE]
+    yield f"✅ Main file found: {main_file_path}"
+
+    # ── Execution + Debug ───────────
+    yield "▶️ Running generated app..."
+
+    with open(main_file_path, "r") as f:
+        current_code = f.read()
 
     for i in range(MAX_DEBUG_TRIES):
-        print(f"\n▶️ Run Attempt {i+1}/{MAX_DEBUG_TRIES}")
+        yield f"▶️ Run Attempt {i+1}"
 
         output, error = run_code(current_code)
 
         if not error:
-            print("✅ Success:\n", output)
-            break
+            yield f"✅ Success:\n{output}"
+            yield "🎉 Project Generated Successfully!"
 
-        print("❌ Error:\n", error)
+            # return folder path also
+            yield {"run_app": main_file_path}
+            return
+
+        yield f"❌ Error:\n{error}"
 
         if i == MAX_DEBUG_TRIES - 1:
-            print("🚨 Max retries reached. Fix manually.")
-            break
+            yield "🚨 Max retries reached"
+            return
 
-        print("🔧 Debugging...")
+        yield "🔧 Debugging..."
 
         fixed_code = debug_agent(error, current_code)
 
         if not fixed_code:
-            print("❌ Debugger failed")
-            break
+            yield "❌ Debugger failed"
+            return
 
         current_code = fixed_code
 
-        with open(MAIN_FILE, "w") as f:
+        with open(main_file_path, "w") as f:
             f.write(current_code)
-            
-    store_memory(f"Idea: {idea}\nTasks: {tasks}")
-            
-if __name__ == "__main__":
-    run()
